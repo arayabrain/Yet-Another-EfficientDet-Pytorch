@@ -55,6 +55,10 @@ def get_args():
     parser.add_argument('--log_path', type=str, default='logs/')
     parser.add_argument('-w', '--load_weights', type=str, default=None,
                         help='whether to load weights from a checkpoint, set None to initialize, set \'last\' to load last checkpoint')
+    parser.add_argument('--brighten_augmentation', type=boolean_string, default=True,
+                        help='Brightness augmentation direction, brighten=True or darken=False')
+    parser.add_argument('--brightness_augmentation_delta', type=float, default=0.0,
+                        help='Maximum delta value for brightness augmentation. This number should be >= 0.0')
     parser.add_argument('--saved_path', type=str, default='logs/')
     parser.add_argument('--debug', type=boolean_string, default=False,
                         help='whether visualize the predicted boxes of training, '
