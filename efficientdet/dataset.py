@@ -168,3 +168,27 @@ class Normalizer(object):
         image, annots = sample['img'], sample['annot']
 
         return {'img': ((image.astype(np.float32) - self.mean) / self.std), 'annot': annots}
+
+
+class OneWayRandomBrightness:
+
+    def __init__(self, delta=40.0/255, brighten=True):
+        assert delta >= 0.0
+        assert delta <= 1.0
+        assert type(brighten) == bool
+
+        self.delta = delta
+        self.brighten = brighten
+
+    def __call__(self, sample):
+        image, annots = sample["img"], sample["annot"]
+        if np.random.randint(2):
+            if self.brighten:
+                delta = np.random.uniform(0, self.delta)
+            else:
+                delta = np.random.uniform(-self.delta, 0)
+
+            image += delta
+            image = np.clip(image, 0.0, 1.0)
+
+        return {"img": image, "annot": annots}
