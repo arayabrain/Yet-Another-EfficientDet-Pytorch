@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+notebook = "*"
+torch = "*"
+torchvision = "*"
+pycocotools = "*"
+numpy = "*"
+opencv-python = "*"
+tqdm = "*"
+tensorboard = "*"
+tensorboardx = "*"
+pyyaml = "*"
+webcolors = "*"
+matplotlib = "*"
+
+[dev-packages]
+black = "*"
+isort = "*"
+
+[requires]
+python_version = "3.8"
