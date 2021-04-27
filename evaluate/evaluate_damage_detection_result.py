@@ -103,7 +103,7 @@ def generate_imgs_with_result_bbox(
                         img, (x1, y1), (x1 + w, y1 + h), COLORS[key], thickness=2
                     )
 
-        cv2.imwrite(f"../evaluate/with_box/{file_name}", img)
+        cv2.imwrite(os.path.join(dst_img_folder, file_name), img)
 
 
 if __name__ == "__main__":
@@ -117,7 +117,7 @@ if __name__ == "__main__":
     }
 
     test_img_folder = "../datasets/fujiseal/dark_test"
-    dst_img_folder = "./with_box"
+    dst_img_folder = "../visualized_evaluation/fujiseal/dark_test/"
     gt_path = "../datasets/fujiseal/annotations/instances_dark_test.json"
     pred_path = "../results/dark_test_bbox_results.json"
 
