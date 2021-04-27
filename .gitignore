@@ -130,3 +130,7 @@ dmypy.json
 .idea/
 weights/
 datasets/
+visualized_evaluation/
+
+# Mac OS
+.DS_Store
