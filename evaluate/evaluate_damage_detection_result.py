@@ -30,14 +30,22 @@ def calc_confusion_matrix(coco_eval, score_threshold, iou_threshold):
             "fn": [],  # index of gt
         }
 
-        filtered = filter(
-            lambda iou_score: iou_score[2] >= score_threshold,
-            zip(range(len(scores[key])), coco_eval.ious[key], scores[key]),
-        )
+        if len(coco_eval.ious[key]) != 0:
+            filtered_ious= filter(
+                lambda iou_score: iou_score[1] >= score_threshold,
+                zip(coco_eval.ious[key], scores[key]),
+            )
+        else:
+            # when there is no object to detect
+            # set iou score to [-1] to be processed as FP-non_duplicate
+            filtered_ious = filter(
+                lambda iou_score: iou_score[1] >= score_threshold,
+                zip([[-1] for _ in range(len(scores[key]))], scores[key]),
+            )
 
         detected_indexes = set()
 
-        for ind, ious, _ in filtered:
+        for ind, (ious, score) in enumerate(filtered_ious):
             if not any(map(lambda iou: iou > iou_threshold, ious)):
                 confusion_matrix["FP"]["non_duplicate"] += 1
                 detection_detail[key]["fp_non_duplicate"].append(
@@ -58,8 +66,9 @@ def calc_confusion_matrix(coco_eval, score_threshold, iou_threshold):
                 )
                 continue
 
-        gt_indexes = set(range(len(ious)))
+        gt_indexes = set(range(len(coco_eval._gts[key])))
         not_detected_indexes = gt_indexes - detected_indexes
+
         if not_detected_indexes:
             for ind in not_detected_indexes:
                 detection_detail[key]["fn"].append(coco_eval._gts[key][ind]["bbox"])
@@ -136,5 +145,5 @@ if __name__ == "__main__":
         test_img_folder=test_img_folder,
         dst_img_folder=dst_img_folder,
         colors=COLORS,
-        brightness_adj_val=50,
+        brightness_adj_val=brightness_adj_val,
     )
