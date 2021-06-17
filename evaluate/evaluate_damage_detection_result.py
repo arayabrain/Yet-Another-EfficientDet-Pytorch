@@ -79,35 +79,32 @@ def generate_imgs_with_result_bbox(
 ):
     os.makedirs(dst_img_folder, exist_ok=True)
 
-    for imgid, imgcat in [
-        (imgid, imgcat)
-        for imgid in coco_eval.params.imgIds
-        for imgcat in coco_eval.params.catIds
-    ]:
+    for imgid in [imgid for imgid in coco_eval.params.imgIds]:
         imgid = int(imgid)
-        imgcat = int(imgcat)
         file_name = coco_eval.cocoGt.loadImgs(ids=imgid)[0]["file_name"]
-
         img = cv2.imread(os.path.join(test_img_folder, file_name))
+
         # brightness adjustment
         img += brightness_adj_val
 
-        detail = detection_detail[(imgid, imgcat)]
-
-        for key in ("tp", "fp_duplicate", "fp_non_duplicate", "fn"):
-            bboxes = detail[key]
-            if bboxes:
-                for bbox in bboxes:
-                    x1, y1, w, h = np.array(bbox).astype(int)
-                    cv2.rectangle(
-                        img, (x1, y1), (x1 + w, y1 + h), COLORS[key], thickness=2
-                    )
+        for imgcat in [imgcat for imgcat in coco_eval.params.catIds]:
+            imgcat = int(imgcat)
+            detail = detection_detail[(imgid, imgcat)]
+            for key in ("tp", "fp_duplicate", "fp_non_duplicate", "fn"):
+                bboxes = detail[key]
+                if bboxes:
+                    for bbox, score in bboxes:
+                        x1, y1, w, h = np.array(bbox).astype(int)
+                        cv2.rectangle(
+                            img, (x1, y1), (x1 + w, y1 + h), COLORS[key], thickness=2
+                        )
+                        cv2.putText(img, f"{score:0.2f}", (x1, y1), cv2.FONT_HERSHEY_PLAIN, 3, COLORS[key], thickness=3)
 
         cv2.imwrite(os.path.join(dst_img_folder, file_name), img)
 
 
 if __name__ == "__main__":
-    score_threshold = 0.1
+    score_threshold = 0.2
     iou_threshold = 10 ** -3
     COLORS = {
         "tp": (0, 255, 0),
