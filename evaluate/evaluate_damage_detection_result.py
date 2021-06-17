@@ -31,7 +31,7 @@ def calc_confusion_matrix(coco_eval, score_threshold, iou_threshold):
         }
 
         if len(coco_eval.ious[key]) != 0:
-            filtered_ious= filter(
+            filtered_ious = filter(
                 lambda iou_score: iou_score[1] >= score_threshold,
                 zip(coco_eval.ious[key], scores[key]),
             )
@@ -49,7 +49,7 @@ def calc_confusion_matrix(coco_eval, score_threshold, iou_threshold):
             if not any(map(lambda iou: iou > iou_threshold, ious)):
                 confusion_matrix["FP"]["non_duplicate"] += 1
                 detection_detail[key]["fp_non_duplicate"].append(
-                    coco_eval._dts[key][ind]["bbox"]
+                    (coco_eval._dts[key][ind]["bbox"], score)
                 )
                 continue
 
@@ -57,12 +57,14 @@ def calc_confusion_matrix(coco_eval, score_threshold, iou_threshold):
             if not found_index in detected_indexes:
                 detected_indexes.add(found_index)
                 confusion_matrix["TP"] += 1
-                detection_detail[key]["tp"].append(coco_eval._dts[key][ind]["bbox"])
+                detection_detail[key]["tp"].append(
+                    (coco_eval._dts[key][ind]["bbox"], score)
+                )
                 continue
             else:
                 confusion_matrix["FP"]["duplicate"] += 1
                 detection_detail[key]["fp_duplicate"].append(
-                    coco_eval._dts[key][ind]["bbox"]
+                    (coco_eval._dts[key][ind]["bbox"], score)
                 )
                 continue
 
@@ -71,7 +73,9 @@ def calc_confusion_matrix(coco_eval, score_threshold, iou_threshold):
 
         if not_detected_indexes:
             for ind in not_detected_indexes:
-                detection_detail[key]["fn"].append(coco_eval._gts[key][ind]["bbox"])
+                detection_detail[key]["fn"].append(
+                    (coco_eval._gts[key][ind]["bbox"], 0)
+                )
 
     confusion_matrix["FN"] = len(coco_gt.getAnnIds()) - confusion_matrix["TP"]
 
@@ -107,7 +111,15 @@ def generate_imgs_with_result_bbox(
                         cv2.rectangle(
                             img, (x1, y1), (x1 + w, y1 + h), COLORS[key], thickness=2
                         )
-                        cv2.putText(img, f"{score:0.2f}", (x1, y1), cv2.FONT_HERSHEY_PLAIN, 3, COLORS[key], thickness=3)
+                        cv2.putText(
+                            img,
+                            f"{score:0.2f}",
+                            (x1, y1),
+                            cv2.FONT_HERSHEY_PLAIN,
+                            3,
+                            COLORS[key],
+                            thickness=3,
+                        )
 
         cv2.imwrite(os.path.join(dst_img_folder, file_name), img)
 
